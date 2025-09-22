@@ -7,7 +7,9 @@ const mensagensIniciais = [
   "Tenho muito orgulho de Você",
   "Você torna tudo muito especial",
   "Te amo muito, obrigado por tudo!",
-
+  "Você me inspira a ser uma pessoa melhor todos os dias",
+  "Você é a melhor escolha que eu ja fiz",
+  "Tudo faz sentido quando estou com você"
 ];
 
 const fotos = [
@@ -17,6 +19,9 @@ const fotos = [
   "/fotos/foto5.jpeg",
   "/fotos/foto6.jpeg",
   "/fotos/foto7.jpeg",
+  "/fotos/foto8.jpeg",
+  "/fotos/foto9.jpeg",
+  "/fotos/foto10.jpeg",
 ];
 
 export default function App() {
