@@ -61,7 +61,7 @@ const cartas = [
   },
   {
     id: 12,
-    mensagem: "O tempo passa e eu sou cada vez mais seu",
+    mensagem: "O tempo passa e eu sou cada vez mais seu!",
     de: "Amoreco do Buteco"
   },
 ];
