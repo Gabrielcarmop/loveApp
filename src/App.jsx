@@ -30,6 +30,25 @@ const fotos = [
   "/fotos/foto8.jpeg", "/fotos/foto9.jpeg", "/fotos/foto10.jpeg",
 ];
 
+// Helper seguro para localStorage
+function getLocalStorage(key, fallback) {
+  try {
+    if (typeof window === "undefined") return fallback;
+    const s = window.localStorage.getItem(key);
+    return s ? JSON.parse(s) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function setLocalStorage(key, value) {
+  try {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(key, JSON.stringify(value));
+    }
+  } catch {}
+}
+
 function ContadorTempoClean() {
   const [tempoJuntos, setTempoJuntos] = useState({ dias: 0, meses: 0, anos: 0 });
   useEffect(() => {
@@ -93,17 +112,17 @@ function CardMensagens() {
   const [categoriaAtiva, setCategoriaAtiva] = useState('deMimParaVoce');
   const [novaMensagem, setNovaMensagem] = useState('');
   const [mostrarForm, setMostrarForm] = useState(false);
-  const [mensagens, setMensagens] = useState(() => {
-    const s = localStorage.getItem('mensagensApp');
-    return s ? JSON.parse(s) : mensagensIniciais;
-  });
-  useEffect(() => { localStorage.setItem('mensagensApp', JSON.stringify(mensagens)); }, [mensagens]);
+  const [mensagens, setMensagens] = useState(() => getLocalStorage('mensagensApp', mensagensIniciais));
+
+  useEffect(() => { setLocalStorage('mensagensApp', mensagens); }, [mensagens]);
+
   useEffect(() => {
     const i = setInterval(() => {
       if (mensagens[categoriaAtiva].length > 0) setMensagemAtual(p => (p + 1) % mensagens[categoriaAtiva].length);
     }, 6000);
     return () => clearInterval(i);
   }, [categoriaAtiva, mensagens]);
+
   const adicionarMensagem = () => {
     if (novaMensagem.trim()) {
       setMensagens({ ...mensagens, [categoriaAtiva]: [...mensagens[categoriaAtiva], novaMensagem.trim()] });
@@ -181,12 +200,14 @@ function MapaInterativo({ onSelecionarLocal, localSelecionado, modoSelecao = fal
 }
 
 function CardLugares() {
-  const [lugares, setLugares] = useState(() => { const s = localStorage.getItem('lugaresApp'); return s ? JSON.parse(s) : []; });
+  const [lugares, setLugares] = useState(() => getLocalStorage('lugaresApp', []));
   const [mostrarForm, setMostrarForm] = useState(false);
   const [modoMapa, setModoMapa] = useState('visualizar');
   const [lugarSelecionado, setLugarSelecionado] = useState(null);
   const [novoLugar, setNovoLugar] = useState({ nome: '', endereco: '', nota: '', lat: -23.5505, lng: -46.6333 });
-  useEffect(() => { localStorage.setItem('lugaresApp', JSON.stringify(lugares)); }, [lugares]);
+
+  useEffect(() => { setLocalStorage('lugaresApp', lugares); }, [lugares]);
+
   const adicionarLugar = () => {
     if (!novoLugar.nome.trim()) return;
     const novo = { id: Date.now(), ...novoLugar, nome: novoLugar.nome.trim(), endereco: novoLugar.endereco.trim() || `${novoLugar.lat.toFixed(4)}, ${novoLugar.lng.toFixed(4)}`, tipo: 'personalizado', nota: novoLugar.nota.trim() || 'Lugar especial' };
@@ -280,7 +301,6 @@ function MenuPrincipal({ onSelecionarCard, cardAtivo }) {
 function AppPrincipal({ onVoltarParaContagem }) {
   const [cardAtivo, setCardAtivo] = useState('imagens');
 
-  // Página de cartas = tela cheia separada
   if (cardAtivo === 'cartas') {
     return <CartasPage onVoltar={() => setCardAtivo('imagens')} />;
   }
@@ -383,7 +403,7 @@ function CardSaudade({ onVerConteudoPrincipal }) {
 }
 
 export default function App() {
-  const [tela, setTela] = useState("cartas"); // "cartas" | "principal" | "saudade"
+  const [tela, setTela] = useState("cartas");
 
   if (tela === "cartas") {
     return <CartasPage onVoltar={() => setTela("principal")} />;

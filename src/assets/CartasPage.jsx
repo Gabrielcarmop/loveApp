@@ -66,6 +66,25 @@ const cartas = [
   },
 ];
 
+// Helper seguro para localStorage
+function getLocalStorage(key, fallback) {
+  try {
+    if (typeof window === "undefined") return fallback;
+    const s = window.localStorage.getItem(key);
+    return s ? JSON.parse(s) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function setLocalStorage(key, value) {
+  try {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(key, JSON.stringify(value));
+    }
+  } catch {}
+}
+
 // ============================================================
 // SVG ENVELOPE COMPONENT
 // ============================================================
@@ -150,7 +169,6 @@ function EnvelopeSVG({ aberto, hover }) {
 // ============================================================
 function ModalCarta({ carta, onFechar }) {
   const [fase, setFase] = useState(0);
-  // fase 0: hidden, 1: envelope abrindo, 2: carta saindo, 3: carta completa
 
   useEffect(() => {
     if (!carta) return;
@@ -189,12 +207,10 @@ function ModalCarta({ carta, onFechar }) {
         }
         .modal-box.show { transform: scale(1) translateY(0); }
 
-        /* Envelope no modal */
         .modal-env-wrap {
           width: 260px; height: 182px; position: relative; flex-shrink: 0;
         }
 
-        /* Papel saindo do envelope */
         .papel-wrap {
           width: calc(100% - 32px); max-width: 408px;
           background: #fffbfc;
@@ -241,7 +257,6 @@ function ModalCarta({ carta, onFechar }) {
         }
         .papel-assinatura.show { opacity: 1; }
 
-        /* Linhas de papel decorativas */
         .papel-linhas {
           position: absolute; inset: 70px 28px 28px;
           background-image: repeating-linear-gradient(
@@ -273,12 +288,10 @@ function ModalCarta({ carta, onFechar }) {
       <div className={`modal-bg ${fase >= 1 ? 'show' : ''}`} onClick={handleFechar}>
         <div className={`modal-box ${fase >= 1 ? 'show' : ''}`} onClick={e => e.stopPropagation()}>
 
-          {/* Envelope no topo do modal */}
           <div className="modal-env-wrap">
             <EnvelopeSVG aberto={fase >= 1} hover={fase >= 1} />
           </div>
 
-          {/* Papel da carta */}
           <div className={`papel-wrap ${fase === 2 ? 'saindo' : ''} ${fase >= 3 ? 'aberto' : ''}`}>
             <div className="papel-linhas" />
 
@@ -312,7 +325,6 @@ function ModalCarta({ carta, onFechar }) {
 function EnvelopeCard({ carta, index, onClick, aberta }) {
   const [hover, setHover] = useState(false);
 
-  // Rotação levemente aleatória por envelope (baseada no index)
   const rotacoes = [-2.5, 1.8, -1.2, 2.2, -0.8, 1.5, -2.1, 1.0, -1.7, 2.4, -0.5, 1.3];
   const rot = rotacoes[index % rotacoes.length];
 
@@ -333,11 +345,9 @@ function EnvelopeCard({ carta, index, onClick, aberta }) {
       }}
       className="env-card-anim"
     >
-      {/* Envelope */}
       <div style={{ width: 150, height: 105, position: "relative" }}>
         <EnvelopeSVG hover={hover} aberto={false} />
 
-        {/* Badge "lida" */}
         {aberta && (
           <div style={{
             position: "absolute", top: -6, right: -6,
@@ -350,7 +360,6 @@ function EnvelopeCard({ carta, index, onClick, aberta }) {
         )}
       </div>
 
-      {/* Título */}
       <p style={{
         fontFamily: "'Nunito', sans-serif",
         fontSize: 11, fontWeight: 700, color: hover ? "#8b1a2a" : "#b04060",
@@ -372,10 +381,7 @@ export default function CartasPage({ onVoltar }) {
   const [cartasAbertas, setCartasAbertas] = useState([]);
 
   useEffect(() => {
-    try {
-      const salvas = JSON.parse(localStorage.getItem("cartasAbertas") || "[]");
-      setCartasAbertas(salvas);
-    } catch {}
+    setCartasAbertas(getLocalStorage("cartasAbertas", []));
   }, []);
 
   const abrirCarta = (carta) => {
@@ -383,7 +389,7 @@ export default function CartasPage({ onVoltar }) {
     if (!cartasAbertas.includes(carta.id)) {
       const novas = [...cartasAbertas, carta.id];
       setCartasAbertas(novas);
-      localStorage.setItem("cartasAbertas", JSON.stringify(novas));
+      setLocalStorage("cartasAbertas", novas);
     }
   };
 
@@ -401,7 +407,6 @@ export default function CartasPage({ onVoltar }) {
           padding-bottom: 60px;
         }
 
-        /* Corações flutuantes de fundo */
         .floating-hearts {
           position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
         }
@@ -419,7 +424,6 @@ export default function CartasPage({ onVoltar }) {
           50% { transform: translateY(-18px) rotate(calc(var(--rot) + 6deg)); }
         }
 
-        /* Header */
         .page-header {
           position: relative; z-index: 1;
           text-align: center;
@@ -453,7 +457,6 @@ export default function CartasPage({ onVoltar }) {
           box-shadow: 0 2px 12px rgba(232,41,58,0.1);
         }
 
-        /* Linha decorativa */
         .page-divider {
           display: flex; align-items: center; gap: 12px;
           max-width: 400px; margin: 0 auto 40px;
@@ -462,7 +465,6 @@ export default function CartasPage({ onVoltar }) {
         .divider-line { flex: 1; height: 1px; background: linear-gradient(to right, transparent, #e8c0c8, transparent); }
         .divider-heart { color: #e8293a; font-size: 14px; }
 
-        /* Grid de envelopes */
         .env-grid {
           position: relative; z-index: 1;
           display: grid;
@@ -490,7 +492,6 @@ export default function CartasPage({ onVoltar }) {
           to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* Botão voltar */
         .btn-voltar {
           position: relative; z-index: 1;
           display: inline-flex; align-items: center; gap: 6px;
@@ -506,7 +507,6 @@ export default function CartasPage({ onVoltar }) {
 
       <div className="cartas-page">
 
-        {/* Corações flutuantes decorativos */}
         <div className="floating-hearts">
           {[
             { size:"18px", op:0.12, dur:"6s", delay:"0s", left:"8%", top:"12%", rot:"-15deg" },
@@ -525,14 +525,12 @@ export default function CartasPage({ onVoltar }) {
           ))}
         </div>
 
-        {/* Botão menu */}
         {onVoltar && (
           <button className="btn-voltar" onClick={onVoltar}>
             ☰ &nbsp;Menu
           </button>
         )}
 
-        {/* Header */}
         <div className="page-header">
           <span className="page-header-icon">💌</span>
           <h1 className="page-titulo">Cartas para você</h1>
@@ -543,14 +541,12 @@ export default function CartasPage({ onVoltar }) {
           </div>
         </div>
 
-        {/* Divisor */}
         <div className="page-divider">
           <div className="divider-line" />
           <span className="divider-heart">♥</span>
           <div className="divider-line" />
         </div>
 
-        {/* Grid de envelopes */}
         <div className="env-grid">
           {cartas.map((carta, index) => (
             <EnvelopeCard
@@ -564,7 +560,6 @@ export default function CartasPage({ onVoltar }) {
         </div>
       </div>
 
-      {/* Modal */}
       <ModalCarta carta={cartaSelecionada} onFechar={() => setCartaSelecionada(null)} />
     </>
   );
