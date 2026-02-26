@@ -369,11 +369,14 @@ function EnvelopeCard({ carta, index, onClick, aberta }) {
 // ============================================================
 export default function CartasPage({ onVoltar }) {
   const [cartaSelecionada, setCartaSelecionada] = useState(null);
-  const [cartasAbertas, setCartasAbertas] = useState(() => {
+  const [cartasAbertas, setCartasAbertas] = useState([]);
+
+  useEffect(() => {
     try {
-      return JSON.parse(localStorage.getItem("cartasAbertas") || "[]");
-    } catch { return []; }
-  });
+      const salvas = JSON.parse(localStorage.getItem("cartasAbertas") || "[]");
+      setCartasAbertas(salvas);
+    } catch {}
+  }, []);
 
   const abrirCarta = (carta) => {
     setCartaSelecionada(carta);
